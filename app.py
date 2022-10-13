@@ -4,10 +4,11 @@ from dotenv import load_dotenv
 import os
 from database import get_database
 import uuid
-
-
+from messageQueue import enqueue,dequeue,initialize_queue,channel
+import json
+from threading import Thread
 load_dotenv()
-print(os.environ["MONGO_URL"])
+initialize_queue()
 myclient = pymongo.MongoClient(os.environ["MONGO_URL"])
 mydb = myclient["mydatabase"]
 app = Flask(__name__)
@@ -28,8 +29,16 @@ def order():
         "content":body["order"]
     }
     print(orderObject)
-    orderCollection.insert_one(orderObject)
+    #pushing the order to message queue
+    enqueue(json.dumps(orderObject))
     return jsonify({"orderId":uniqueId})
+
+
+def placeOrder(a,b,c,orderObject):
+    
+    print("DEQUEUED",orderObject)
+    orderCollection.insert_one(json.loads(orderObject))
+dequeue(placeOrder)
 
 @app.route("/getorders", methods=["GET"])
 def getOrder():
@@ -52,5 +61,11 @@ def getOrderById(order_id):
 def heartbeat():
     return jsonify({"heartbeat":True})
 
+
+def startConsumption(): 
+    channel.start_consuming()
+
+thread = Thread(target=startConsumption)
+thread.start()
 
 
