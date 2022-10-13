@@ -1,7 +1,10 @@
 
 # Red Hat Apprentice
 
+The application uses RabbitMQ based Load balancing Flask Application.
+You wil require local rabbitMq connection along with erlang installed to run this project locally.
 
+All the mentioned endpoints along with load balancing are setup 
 
 
 ## API Reference
@@ -54,7 +57,8 @@ python -m venv env
 ```
 cd ./env/Scripts; ./activate; cd ../../
 ```
-4. Start flask server
+4. Install erlang and rabbitMq locally
+5. Start flask server
 ```
  flask --app app.py --debug run
 ```

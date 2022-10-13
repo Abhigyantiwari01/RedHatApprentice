@@ -21,6 +21,10 @@ def welcome():
 
 @app.route("/order", methods=["POST"])
 def order():
+    """
+    Heavy consmption tasks like database insertion are done inside the queue for load balancing
+    The database task insertion can be changed into any other high computational function
+    """
     print("running")
     body = request.json
     uniqueId = str(uuid.uuid4()).split("-")[0]
@@ -33,6 +37,21 @@ def order():
     enqueue(json.dumps(orderObject))
     return jsonify({"orderId":uniqueId})
 
+def old_nonbalanced_order():
+    """
+    This is the old endpoint function which was used inintially for non load balanced requests post
+    """
+    print("running")
+    body = request.json
+    uniqueId = str(uuid.uuid4()).split("-")[0]
+    orderObject = {
+        "orderId":uniqueId,
+        "content":body["order"]
+    }
+    print(orderObject)
+    #pushing the order to message queue
+    orderCollection.insert_one(orderObject)
+    return jsonify({"orderId":uniqueId})
 
 def placeOrder(a,b,c,orderObject):
     
